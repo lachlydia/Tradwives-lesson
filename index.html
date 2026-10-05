@@ -1,0 +1,516 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tradwives: Read, Check, Feedback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single study column with a sticky step bar; each step is one panel, like a workbook page */
+:root{
+  --bg:#F3F2F6; --surface:#FFFFFF; --fg:#211B2A; --muted:#625A6E; --line:#DCD6E4;
+  --accent:#A62E57; --accent-soft:#F6E3EA; --good:#23734F; --good-soft:#E1F1E8;
+  --bad:#B33A2E; --bad-soft:#F8E4E1; --warn:#8A5A0B; --warn-soft:#FBEFD8;
+  --display:"Young Serif",Georgia,"Times New Roman",serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17141C; --surface:#211D28; --fg:#EEEAF3; --muted:#A79FB3; --line:#3A3445;
+  --accent:#E77FA2; --accent-soft:#3B2230; --good:#6CCB9B; --good-soft:#18342A;
+  --bad:#F08A7E; --bad-soft:#3E2220; --warn:#E8B860; --warn-soft:#3A2E17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17141C; --surface:#211D28; --fg:#EEEAF3; --muted:#A79FB3; --line:#3A3445;
+  --accent:#E77FA2; --accent-soft:#3B2230; --good:#6CCB9B; --good-soft:#18342A;
+  --bad:#F08A7E; --bad-soft:#3E2220; --warn:#E8B860; --warn-soft:#3A2E17; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+header.top{padding-block:28px 12px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,40px);line-height:1.1;margin:.2em 0 .1em;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:26px;line-height:1.2;margin:0 0 6px;text-wrap:balance}
+h3{font-size:18px;margin:0}
+p{margin:0}
+nav.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:8px 16px;display:flex;gap:6px;overflow-x:auto}
+nav.steps a{flex:none;text-decoration:none;color:var(--muted);font-weight:700;font-size:15px;padding:7px 12px;border-radius:999px;border:1px solid transparent}
+nav.steps a .t{font-family:var(--mono);font-weight:400;font-size:12px;margin-left:4px}
+nav.steps a[aria-current="page"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+nav.steps a:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section.panel{display:grid;gap:20px;padding-top:24px}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px;min-width:0}
+.goal{border-left:5px solid var(--accent)}
+.goal p.g{font-family:var(--display);font-size:21px;line-height:1.35}
+blockquote{margin:0;font-family:var(--display);font-size:20px;line-height:1.4;padding-left:14px;border-left:3px solid var(--line)}
+.timeline{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.timeline li{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:baseline}
+.timeline .min{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.levels{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;font-weight:700}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.lvl[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.item{display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0;padding-top:0}
+.item.ok{--mark:var(--good)} .item.no{--mark:var(--bad)}
+.item.ok,.item.no{box-shadow:inset 4px 0 0 var(--mark);padding-left:12px}
+select,textarea,input[type=text]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;max-width:100%}
+textarea{min-height:170px;resize:vertical;line-height:1.5}
+.small{font-size:14px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:13px}
+.score{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.fb{font-size:15px;border-radius:8px;padding:10px 12px}
+.fb.good{background:var(--good-soft);color:var(--good)} .fb.bad{background:var(--bad-soft);color:var(--bad)} .fb.warn{background:var(--warn-soft);color:var(--warn)}
+.fb ul{margin:4px 0 0;padding-left:20px}
+.choices{display:grid;gap:6px}
+.choices label{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:6px;cursor:pointer}
+.choices label:hover{background:var(--bg)}
+.choices label.right{background:var(--good-soft)} .choices label.wrong{background:var(--bad-soft)}
+.tf{display:flex;gap:8px}
+.tf button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.model{background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;white-space:pre-line}
+.check{display:flex;gap:10px;align-items:flex-start}
+.check input{margin-top:5px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.meter{display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden;max-width:220px}
+.bar i{display:block;height:100%;background:var(--accent);width:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top;font-size:15px}
+th{font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+td input,td select{padding:6px 8px;font-size:15px}
+details summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.lights{display:flex;gap:6px;flex-wrap:wrap}
+.lights button{font-weight:400;font-size:14px;padding:6px 10px}
+.lights button[data-v="green"][aria-pressed="true"]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.lights button[data-v="amber"][aria-pressed="true"]{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.lights button[data-v="red"][aria-pressed="true"]{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.ticket{border:2px solid var(--fg);border-radius:10px;padding:16px;display:grid;gap:8px}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Eng 13 · The individual and society · Text 3</div>
+  <h1>Tradwives: Read, Check, Get Feedback</h1>
+  <p class="lead">Amanda Marcotte, “The insidious rise of ‘tradwives’” (Salon, 2023). Reader pp. 10–13.</p>
+</header>
+<nav class="steps" aria-label="Lesson steps">
+  <a href="#goal" data-tab="goal">Goal <span class="t">0–5</span></a>
+  <a href="#vocab" data-tab="vocab">Vocabulary <span class="t">5–15</span></a>
+  <a href="#reading" data-tab="reading">Reading check <span class="t">25–40</span></a>
+  <a href="#tasks" data-tab="tasks">Tasks <span class="t">40–70</span></a>
+  <a href="#reflect" data-tab="reflect">Reflection <span class="t">80–90</span></a>
+</nav>
+
+<!-- GOAL -->
+<section class="panel" id="p-goal">
+  <div class="card goal">
+    <div class="eyebrow">Today's goal</div>
+    <p class="g">By the end of this lesson, I can sum up Marcotte's criticism of tradwife content and explain how her tone supports her argument, using at least three expressions from the text.</p>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Warm-up question</div>
+    <blockquote>“Most ‘tradwives’ online are far more #GirlBoss than even the most outspoken feminist.”</blockquote>
+    <p>Who wrote this: a fan or a critic of tradwives? What makes you think so?</p>
+  </div>
+  <div class="card">
+    <h3>Today's plan</h3>
+    <ol class="timeline">
+      <li><span class="min">0–5</span><span>Goal and warm-up question</span></li>
+      <li><span class="min">5–15</span><span>Vocabulary: the 15 chunks from the word list</span></li>
+      <li><span class="min">15–25</span><span>Input: how to analyse tone</span></li>
+      <li><span class="min">25–40</span><span>Read the article, then do the reading check</span></li>
+      <li><span class="min">40–70</span><span>Choose your task (B1, B2 or C1), work alone or together, check your text</span></li>
+      <li><span class="min">70–80</span><span>Share and challenge: were your predictions right?</span></li>
+      <li><span class="min">80–90</span><span>Reflection: did you reach the goal?</span></li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3>Why this matters for the Abitur</h3>
+    <p>The writing part of the Hamburg Abitur asks you to <b>sum up</b> (AFB I), <b>analyse</b> (AFB II) and <b>comment, assess or re-create</b> (AFB III). Today you practise all three operators on one text.</p>
+  </div>
+</section>
+
+<!-- VOCAB -->
+<section class="panel" id="p-vocab" hidden>
+  <div>
+    <h2>Vocabulary</h2>
+    <p class="lead">Start with Level 1. When you finish, move on. Every answer is checked straight away.</p>
+  </div>
+  <div class="levels" role="group" aria-label="Vocabulary level">
+    <button class="lvl" data-vl="1" aria-pressed="true">Level 1 · B1</button>
+    <button class="lvl" data-vl="2" aria-pressed="false">Level 2 · B2</button>
+    <button class="lvl" data-vl="3" aria-pressed="false">Level 3 · C1</button>
+  </div>
+  <div class="card" id="v1">
+    <div class="row" style="justify-content:space-between"><h3>Match the chunk with its German meaning</h3><span class="score" id="v1s">0 / 10</span></div>
+    <div id="v1list"></div>
+    <div class="row"><button class="primary" id="v1check">Check my answers</button><button id="v1show" hidden>Show correct answers</button></div>
+    <div id="v1fb"></div>
+  </div>
+  <div class="card" id="v2" hidden>
+    <div class="row" style="justify-content:space-between"><h3>Complete the sentences</h3><span class="score" id="v2s">0 / 8</span></div>
+    <p class="small">Two chunks in the list are not needed.</p>
+    <div id="v2list"></div>
+    <div class="row"><button class="primary" id="v2check">Check my answers</button><button id="v2show" hidden>Show correct answers</button></div>
+    <div id="v2fb"></div>
+  </div>
+  <div class="card" id="v3" hidden>
+    <div class="row" style="justify-content:space-between"><h3>Meaning in context</h3><span class="score" id="v3s">0 / 6</span></div>
+    <p class="small">Look at the line in the text before you choose.</p>
+    <div id="v3list"></div>
+    <div class="row"><button class="primary" id="v3check">Check my answers</button></div>
+    <div id="v3fb"></div>
+    <h3>Rewrite with a chunk</h3>
+    <div id="v3open"></div>
+  </div>
+  <div class="card">
+    <h3>Partner check (2 min)</h3>
+    <p>Which chunk sounds the most negative? Which one would you use in your own comment, and why?</p>
+  </div>
+</section>
+
+<!-- READING -->
+<section class="panel" id="p-reading" hidden>
+  <div>
+    <h2>Reading check</h2>
+    <p class="lead">Read the article on pp. 10–13 first. Then decide: true or false? Each answer shows the line where you can check it.</p>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h3>True or false?</h3><span class="score" id="tfs">0 / 8</span></div>
+    <div id="tflist"></div>
+  </div>
+  <div class="card">
+    <h3>Read, check, challenge</h3>
+    <p class="small">Answer in one or two sentences. Then compare with the model answer.</p>
+    <div id="rqlist"></div>
+  </div>
+  <div class="card">
+    <h3>Back to your predictions</h3>
+    <p>Look at the two appeals and two concerns you wrote down last lesson. Which ones does Marcotte confirm? What does she add? Does the article confirm or challenge your group's decision from the role play?</p>
+  </div>
+</section>
+
+<!-- TASKS -->
+<section class="panel" id="p-tasks" hidden>
+  <div>
+    <h2>Choose your task</h2>
+    <p class="lead">Pick a track and work alone, with a partner or in a group. Write your text here, check it with the list, then compare it with a model answer. You can switch to a higher track at any time.</p>
+  </div>
+  <div class="levels" role="group" aria-label="Task track">
+    <button class="lvl" data-track="b1" aria-pressed="false">B1 · Get the message</button>
+    <button class="lvl" data-track="b2" aria-pressed="false">B2 · Read the tone</button>
+    <button class="lvl" data-track="c1" aria-pressed="false">C1 · Challenge the author</button>
+  </div>
+  <p class="small" id="trackhint">Choose a track to see your tasks.</p>
+  <div id="taskarea"></div>
+  <div class="card" id="extra" hidden>
+    <h3>Finished early? Critical extra question</h3>
+    <p>Marcotte calls tradwives “more #GirlBoss than even the most outspoken feminist” (ll. 84–85). Is that a fair point or a cheap shot? Prepare two arguments for the discussion.</p>
+  </div>
+</section>
+
+<!-- REFLECT -->
+<section class="panel" id="p-reflect" hidden>
+  <div>
+    <h2>Reflection</h2>
+    <p class="lead">Be honest. This helps you and your teacher plan the next step.</p>
+  </div>
+  <div class="card" id="cando"></div>
+  <div class="card">
+    <h3>Use one new chunk</h3>
+    <p class="small">Write one sentence about your own view on tradwife content. Use a chunk from today.</p>
+    <input type="text" id="rsent" placeholder="e.g. I think many viewers are not credulous audiences, because …">
+    <div id="rsentfb"></div>
+  </div>
+  <div class="card">
+    <h3>One thing I still find difficult is …</h3>
+    <input type="text" id="rdiff">
+  </div>
+  <div class="ticket" id="ticket">
+    <div class="eyebrow">Exit ticket · show this to your teacher</div>
+    <div id="ticketbody" class="small">Fill in the traffic lights above to complete your ticket.</div>
+  </div>
+</section>
+
+<div class="foot small" style="margin-top:28px">
+  <span>Your answers stay in this browser only. Nothing is sent anywhere.</span>
+  <button id="reset">Start again</button>
+</div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem('tw:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('tw:'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shuffle(a,seed){a=a.slice();let s=seed||7;for(let i=a.length-1;i>0;i--){s=(s*9301+49297)%233280;const j=Math.floor(s/233280*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const words=t=>(t.trim().match(/[A-Za-z’'-]+/g)||[]).length;
+
+/* ---------- tabs ---------- */
+const tabs=['goal','vocab','reading','tasks','reflect'];
+function show(t){if(!tabs.includes(t))t='goal';tabs.forEach(x=>{$('#p-'+x).hidden=x!==t});
+  $$('nav.steps a').forEach(a=>a.setAttribute('aria-current',a.dataset.tab===t?'page':'false'));
+  store.set('tab',t);}
+$$('nav.steps a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();show(a.dataset.tab);
+  try{history.replaceState(null,'','#'+a.dataset.tab)}catch(_){} window.scrollTo({top:0})}));
+show((location.hash||'').slice(1)||store.get('tab','goal'));
+
+/* ---------- chunk list (Reader word list) ---------- */
+const CHUNKS=[
+ ['peddling fantasies of female submission',/peddl\w*\s+(a\s+)?fantas/i],['conventionally attractive',/conventionally attractive/i],
+ ['the joys of submissive marriage',/submissive marriage/i],['a neat marketing trick',/neat marketing trick/i],
+ ['credulous audiences',/credulous/i],['the male gaze',/male gaze/i],['damaging to men’s psyches',/damaging to/i],
+ ['placid vessels',/placid vessel/i],['a steady stream of social media delusions',/steady stream/i],['right-wing propaganda',/right-wing propaganda/i],
+ ['exploiting young men',/exploit\w*/i],['a more realistic view of dating and relationships',/realistic view/i],
+ ['playing a shell game',/shell game/i],['aggressively opinionated',/aggressively opinionated/i],['a toxic fantasy',/toxic fantas/i]];
+const chunksIn=t=>CHUNKS.filter(c=>c[1].test(t)).map(c=>c[0]);
+
+/* ---------- vocab level switch ---------- */
+$$('[data-vl]').forEach(b=>b.addEventListener('click',()=>{const l=b.dataset.vl;
+  $$('[data-vl]').forEach(x=>x.setAttribute('aria-pressed',x===b));['1','2','3'].forEach(n=>$('#v'+n).hidden=n!==l);store.set('vl',l)}));
+{const l=store.get('vl','1');const b=$(`[data-vl="${l}"]`);if(b)b.click();}
+
+/* Level 1: match */
+const V1=[['peddling fantasies of female submission','Fantasien weiblicher Unterordnung verkaufen'],['a neat marketing trick','ein geschickter Marketingtrick'],
+ ['credulous audiences','leichtgläubige Zielgruppen'],['the male gaze','der männliche Blick'],['damaging to men’s psyches','schädlich für die Psyche von Männern'],
+ ['placid vessels','fügsame, willenlose Hüllen'],['a steady stream of social media delusions','ein ständiger Strom sozialmedialer Illusionen'],
+ ['exploiting young men','junge Männer ausnutzen'],['playing a shell game','ein Täuschungsmanöver betreiben'],['aggressively opinionated','demonstrativ meinungsstark']];
+const v1opts=shuffle(V1.map(x=>x[1]),11);
+const v1saved=store.get('v1',{});
+$('#v1list').innerHTML=V1.map((p,i)=>`<div class="item" id="v1i${i}"><label for="v1-${i}"><b>${esc(p[0])}</b></label>
+ <select id="v1-${i}"><option value="">Choose …</option>${v1opts.map(o=>`<option${v1saved[i]===o?' selected':''}>${esc(o)}</option>`).join('')}</select></div>`).join('');
+$('#v1list').addEventListener('change',()=>{const s={};V1.forEach((_,i)=>s[i]=$('#v1-'+i).value);store.set('v1',s)});
+$('#v1check').addEventListener('click',()=>{let n=0,empty=0;V1.forEach((p,i)=>{const v=$('#v1-'+i).value,it=$('#v1i'+i);
+  it.classList.remove('ok','no');if(!v){empty++;return}if(v===p[1]){n++;it.classList.add('ok')}else it.classList.add('no')});
+  $('#v1s').textContent=n+' / 10';$('#v1show').hidden=n===10;
+  $('#v1fb').innerHTML=n===10?`<div class="fb good">All correct. Go on to Level 2.</div>`:
+   `<div class="fb ${n>=7?'warn':'bad'}">${n} of 10 correct${empty?`, ${empty} still empty`:''}. Change the red ones and check again. Tip: look for the key word, e.g. “credulous” = believes too easily.</div>`});
+$('#v1show').addEventListener('click',()=>{V1.forEach((p,i)=>{$('#v1-'+i).value=p[1]});$('#v1check').click()});
+
+/* Level 2: gap fill */
+const V2BANK=['a neat marketing trick','the male gaze','credulous audiences','a steady stream','placid vessels','playing a shell game','damaging','exploiting','right-wing propaganda','aggressively opinionated'];
+const V2=[['Calling your critics “jealous” is','a neat marketing trick',': it turns criticism into free advertising.'],
+ ['Many of the videos are made for','the male gaze',', presenting the woman mainly as something to look at.'],
+ ['Fake miracle cures are usually sold to','credulous audiences','who believe everything they see online.'],
+ ['After an hour on TikTok, he had watched','a steady stream','of perfect homes and perfect wives.'],
+ ['Marcotte argues that the videos teach men to see women as','placid vessels','who exist only to serve.'],
+ ['The influencers are','playing a shell game',': they call themselves humble housewives while running a big business.'],
+ ['Psychologists warn that constant comparison with perfect bodies can be','damaging','to young people’s self-esteem.'],
+ ['Some online “coaches” make money by','exploiting','young men who feel lonely and rejected.']];
+const v2opts=shuffle(V2BANK,5),v2saved=store.get('v2',{});
+$('#v2list').innerHTML=V2.map((s,i)=>`<div class="item" id="v2i${i}"><label for="v2-${i}">${i+1}. ${esc(s[0])} ___ ${esc(s[2])}</label>
+ <select id="v2-${i}"><option value="">Choose …</option>${v2opts.map(o=>`<option${v2saved[i]===o?' selected':''}>${esc(o)}</option>`).join('')}</select></div>`).join('');
+$('#v2list').addEventListener('change',()=>{const s={};V2.forEach((_,i)=>s[i]=$('#v2-'+i).value);store.set('v2',s)});
+$('#v2check').addEventListener('click',()=>{let n=0;V2.forEach((s,i)=>{const v=$('#v2-'+i).value,it=$('#v2i'+i);it.classList.remove('ok','no');
+  if(!v)return;if(v===s[1]){n++;it.classList.add('ok')}else it.classList.add('no')});
+  $('#v2s').textContent=n+' / 8';$('#v2show').hidden=n===8;
+  $('#v2fb').innerHTML=n===8?`<div class="fb good">All correct. Try Level 3, or go to the reading check.</div>`:
+   `<div class="fb ${n>=6?'warn':'bad'}">${n} of 8 correct. Read the whole sentence again: does the chunk fit the grammar (a noun? a verb with -ing?) and the meaning?</div>`});
+$('#v2show').addEventListener('click',()=>{V2.forEach((s,i)=>{$('#v2-'+i).value=s[1]});$('#v2check').click()});
+
+/* Level 3: meaning in context + rewrite */
+const V3=[
+ ['“credulous audiences” (l. 27)',['people who believe things too easily','people who give creators credit for their work','people who are very religious'],0],
+ ['“sleight of hand” (l. 35)',['an honest mistake','a clever trick that distracts from what is really happening','a gesture of politeness'],1],
+ ['“placid vessels” (l. 54)',['peaceful and caring mothers','women who are calm and confident','passive objects without a will of their own'],2],
+ ['“right-wing grifter” (l. 20)',['a conservative politician','someone who makes money with dishonest tricks','a journalist who reports on the far right'],1],
+ ['“playing a shell game” (l. 78)',['hiding the truth to deceive the audience','avoiding all criticism','playing a harmless game for children'],0],
+ ['“aggressively opinionated” (l. 83)',['physically violent towards critics','open to many different opinions','expressing strong views forcefully all the time'],2]];
+const v3saved=store.get('v3',{});
+$('#v3list').innerHTML=V3.map((q,i)=>`<div class="item" id="v3i${i}"><b>${i+1}. ${esc(q[0])} means …</b><div class="choices">
+ ${q[1].map((o,j)=>`<label><input type="radio" name="v3-${i}" value="${j}"${v3saved[i]==j?' checked':''}> <span>${esc(o)}</span></label>`).join('')}</div></div>`).join('');
+$('#v3list').addEventListener('change',()=>{const s={};V3.forEach((_,i)=>{const c=document.querySelector(`input[name="v3-${i}"]:checked`);if(c)s[i]=+c.value});store.set('v3',s)});
+$('#v3check').addEventListener('click',()=>{let n=0;V3.forEach((q,i)=>{const c=document.querySelector(`input[name="v3-${i}"]:checked`);
+  $$(`input[name="v3-${i}"]`).forEach(r=>r.parentElement.classList.remove('right','wrong'));
+  if(!c)return;if(+c.value===q[2]){n++;c.parentElement.classList.add('right')}else c.parentElement.classList.add('wrong')});
+  $('#v3s').textContent=n+' / 6';
+  $('#v3fb').innerHTML=`<div class="fb ${n===6?'good':n>=4?'warn':'bad'}">${n} of 6 correct.${n<6?' Read the line again and look at what comes before and after the expression.':' Now rewrite the two sentences below.'}</div>`});
+const V3O=[['These creators earn money by selling viewers an unrealistic dream of obedient wives.',/peddl\w*\s+(a\s+)?fantas/i,'peddling fantasies (of female submission)','These creators are peddling fantasies of female submission to their viewers.'],
+ ['The comments show that many viewers simply believe whatever they are told.',/credulous/i,'credulous audiences','The comments suggest that the videos are aimed at credulous audiences.']];
+const v3o=store.get('v3o',{});
+$('#v3open').innerHTML=V3O.map((o,i)=>`<div class="item"><label for="v3o-${i}">${i+1}. ${esc(o[0])}<br><span class="small">Use: <i>${esc(o[2])}</i></span></label>
+ <input type="text" id="v3o-${i}" value="${esc(v3o[i]||'')}"><div class="row"><button data-v3o="${i}">Check</button></div><div id="v3ofb${i}"></div></div>`).join('');
+$('#v3open').addEventListener('input',()=>{const s={};V3O.forEach((_,i)=>s[i]=$('#v3o-'+i).value);store.set('v3o',s)});
+$('#v3open').addEventListener('click',e=>{const i=e.target.dataset.v3o;if(i==null)return;const o=V3O[i],t=$('#v3o-'+i).value;
+  const has=o[1].test(t),long=words(t)>=6;
+  $('#v3ofb'+i).innerHTML=`<div class="fb ${has&&long?'good':'warn'}">${has?'You used the chunk.':'The chunk is missing. Use: '+esc(o[2])+'.'} ${long?'':'Write a full sentence. '}Compare: <i>${esc(o[3])}</i></div>`});
+
+/* ---------- Reading: true / false ---------- */
+const TF=[['Right-wing influencers claim that feminists are obsessed with attacking tradwives.',true,'ll. 11–13: “feminists are single-mindedly obsessed with destroying women who identify as ‘tradwives.’”'],
+ ['Marcotte believes that tradwife content is watched mainly by women.',false,'ll. 40–44: most critics assume a female audience, but she says many videos have “a strong whiff of the male gaze”.'],
+ ['According to Marcotte, tradwife content contributes to the loneliness of young men.',true,'ll. 36–39: they are “contributing to the male loneliness epidemic”.'],
+ ['Marcotte blames video games for young men’s problems with dating.',false,'ll. 50–51: conservative commentators blame porn and video games. Marcotte blames right-wing content (l. 52).'],
+ ['The comments under “Mrs. Midwest” videos suggest that some viewers take the fantasy for real.',true,'ll. 56–57: “the viewers are unaware that this is not for real”.'],
+ ['Marcotte argues that women’s nature has changed over time.',false,'ll. 71–72: “What changed wasn’t women’s brains, but their options.”'],
+ ['Marcotte says that creating online content is a form of work.',true,'l. 79: “creating online content is work, and often quite lucrative”.'],
+ ['Marcotte praises tradwives for being humble.',false,'ll. 82–84: they “want to sell themselves as humble”, but the genre is “aggressively opinionated”.']];
+const tfs=store.get('tf',{});
+function tfRender(){let n=0;$('#tflist').innerHTML=TF.map((q,i)=>{const a=tfs[i];let cls='',fb='';
+  if(a!=null){const ok=a===q[1];if(ok)n++;cls=ok?'ok':'no';fb=`<div class="fb ${ok?'good':'bad'}">${ok?'Correct.':'Not quite.'} ${esc(q[2])}</div>`}
+  return `<div class="item ${cls}"><span>${i+1}. ${esc(q[0])}</span><div class="tf"><button data-tf="${i}" data-a="1" aria-pressed="${a===true}">True</button><button data-tf="${i}" data-a="0" aria-pressed="${a===false}">False</button></div>${fb}</div>`}).join('');
+  $('#tfs').textContent=n+' / 8';}
+$('#tflist').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(!b)return;tfs[b.dataset.tf]=b.dataset.a==='1';store.set('tf',tfs);tfRender()});
+tfRender();
+
+const RQ=[['Which audience is the author most concerned about?','Young men. She thinks tradwife videos sell them an unrealistic picture of women, which makes dating harder and leaves them lonely and angry (ll. 35–39, 52–54).'],
+ ['Who does she believe benefits from the trend?','The tradwife creators, who earn money and attention (ll. 78–84), and right-wing “grifters” like Shapiro, Peterson and Tate, who profit from frustrated young men (ll. 63–66).'],
+ ['How does she distinguish fantasy from reality?','The fantasy is a submissive, always perfect wife who exists to serve. In reality, women value independence and freedom, and a real relationship needs respect for women “as they actually are” (ll. 70–77).']];
+const rq=store.get('rq',{});
+$('#rqlist').innerHTML=RQ.map((q,i)=>`<div class="item"><label for="rq-${i}"><b>${esc(q[0])}</b></label><textarea id="rq-${i}" style="min-height:80px">${esc(rq[i]||'')}</textarea>
+ <div class="row"><button data-rq="${i}">Compare with model answer</button></div><div id="rqm${i}" class="model" hidden>${esc(q[1])}</div></div>`).join('');
+$('#rqlist').addEventListener('input',()=>{const s={};RQ.forEach((_,i)=>s[i]=$('#rq-'+i).value);store.set('rq',s)});
+$('#rqlist').addEventListener('click',e=>{const i=e.target.dataset.rq;if(i==null)return;
+  if(words($('#rq-'+i).value)<5){$('#rqm'+i).hidden=false;$('#rqm'+i).textContent='Write your own answer first (at least one sentence). Then compare.';return}
+  $('#rqm'+i).hidden=false;$('#rqm'+i).textContent=RQ[i][1]});
+
+/* ---------- Tasks ---------- */
+const lineRef=/\b(ll?\.\s*\d+|lines?\s+\d+)/gi;
+const TONE=/\b(sarcastic|ironic|mocking|polemic(al)?|aggressive|humorous|critical|emotional|provocative|sneering|condescending|indignant|scornful|satirical|outraged|angry|concerned|informal|subjective|biased|entertaining)\b/i;
+const LINK=/\b(furthermore|moreover|in addition|additionally|however|therefore|consequently|as a result|thus|finally|firstly|secondly|first|second|on the other hand|whereas|while|although|nevertheless|overall|in conclusion)\b/gi;
+const OPINION=/\b(I think|I believe|in my opinion|I feel|personally)\b/i;
+const NUANCE=/(from my (character’s|character's) perspective|the main appeal|we need to distinguish|what the (post|article) leaves out|may reinforce|although it is presented|the financial incentive|I see your point|could you clarify|a possible counterargument)/gi;
+const LOADED=/\b(bitches|dastardly|sinister|brave|smoking hot|credulous|gullible|silly|delusions|grifter|troll|helpmeet)\b/gi;
+const cnt=(re,t)=>(t.match(re)||[]).length;
+
+const TASKS={
+ b1:[{id:'b1a',title:'Task 1 · Sum up',op:'sum up · AFB I',min:120,max:150,
+   prompt:'Sum up Marcotte’s criticism of the tradwife phenomenon (120–150 words).',
+   scaffold:['What do tradwives pretend? (ll. 25–36)','Who is the content really for? (ll. 40–44)','Why is it harmful, and for whom? (ll. 45–66)','Why are tradwives hypocritical? (ll. 78–86)'],
+   starter:'In her article “The insidious rise of ‘tradwives’”, published in Salon in November 2023, Amanda Marcotte criticises …',
+   checks:['My first sentence names the author, title, source and topic.','I covered all four main points.','I wrote in the present tense.','I used my own words and no quotes.','I did not give my own opinion.'],
+   tips:['Start with: In her article “…”, published in …, Amanda Marcotte criticises …','Use the four guiding questions above as a plan: one or two sentences for each.','Use the present tense: she argues, she claims, she points out.','A summary has no quotes. Rephrase the idea in simple words.','Leave out “I think”. Your opinion belongs in a comment, not in a summary.'],
+   auto:t=>{const r=[];if(!/marcotte/i.test(t))r.push(['bad','Name the author (Amanda Marcotte) in your first sentence.']);
+     const pts=[[/feminis/i,'the fake fight with feminists'],[/gaze|\bmen\b.*(watch|view|audience)|male (viewer|audience)/i,'who the content is for'],[/lonel|dating|expect|unrealistic/i,'the harm to young men'],[/hypocri|work|money|business|girlboss|lucrative/i,'the hypocrisy']];
+     const miss=pts.filter(p=>!p[0].test(t)).map(p=>p[1]);if(miss.length)r.push(['warn','Check if you included: '+miss.join(', ')+'.']);else r.push(['good','You seem to cover all four main points.']);
+     if(/[“"][^”"]{12,}[”"]/.test(t))r.push(['warn','You use a quotation. In a summary, put it in your own words.']);
+     if(OPINION.test(t))r.push(['warn','“I think / in my opinion” does not belong in a summary.']);return r},
+   model:'In her article “The insidious rise of ‘tradwives’”, published in Salon in November 2023, Amanda Marcotte criticises tradwife influencers and argues that their content harms young men. First, she claims that tradwives pretend to be victims of feminists in order to sell the idea that women naturally want to submit to men. Second, she points out that much of this content is not only made for women but is designed to please male viewers. Third, she argues that the videos give young men an unrealistic picture of women. As a result, these men struggle with dating, feel lonely and become easy targets for right-wing influencers who make money from their frustration. Finally, Marcotte accuses tradwives of hypocrisy, because running a successful online business is ambitious, well-paid work and the opposite of the humble life they promote.'},
+  {id:'b1b',title:'Creative choice · Neutral news report',op:'re-create · AFB III',min:60,max:80,
+   prompt:'Rewrite lines 25–33 as a neutral news report (60–80 words). Keep the facts, remove the judgement. Then name three words you changed and why.',
+   checks:['I kept the facts of the paragraph.','I removed insults and sarcastic words.','My report sounds calm and objective.','I named three words I changed and explained why.'],
+   tips:['Check the paragraph again: who does what, and what does the author claim?','Words like “bitches”, “dastardly” or “smoking hot” show judgement. Replace them with neutral words.','Use reporting verbs: according to the author, she claims, the videos show.','Add a short list at the end: “brave” → (deleted), because it was ironic.'],
+   auto:t=>{const l=[...new Set((t.match(LOADED)||[]).map(x=>x.toLowerCase()))];
+     return l.length?[['warn','These words still sound judging: '+l.join(', ')+'. Did you use them on purpose in your list of changed words?']]:[['good','No loaded words from the original found. Good.']]},
+   model:'Some tradwife influencers present themselves as a target of feminist criticism. According to the author, this helps them promote the idea that women naturally prefer a submissive role and that feminism stops them from living it. The videos often show young, slim women with professional make-up. They may suggest to male viewers that a wife who always agrees, is always available and never changes physically is a realistic expectation.\n\nChanged words: “bitches” → removed (insult) · “brave” → removed (ironic) · “smoking hot 22-year-old” → “young” (judging and exaggerated).'}],
+ b2:[{id:'b2a',title:'Task 1 · Analyse the tone',op:'analyse · AFB II',min:150,max:200,table:true,
+   prompt:'Find four examples of how Marcotte creates her tone. Fill in the table. Then write one analysis paragraph (150–200 words) that starts with a clear claim.',
+   starter:'Marcotte’s tone is …, which she creates by …',
+   checks:['My first sentence makes a claim about the tone (adjective!).','I use at least four quotes with line numbers.','I name the stylistic device for each quote.','I explain the effect on the reader each time.','I connect my ideas with linking words.'],
+   tips:['Use a precise adjective: sarcastic, polemical, mocking, ironic, provocative …','Quote short phrases and add (l. 30) after each.','Devices: irony, hyperbole, loaded words, direct address, metaphor, anaphora, rhetorical question.','Always add “This makes the reader …” or “This shows …”. Naming a device is not enough.','Use: Furthermore, In addition, Moreover, However, Overall …'],
+   auto:t=>{const r=[],q=cnt(lineRef,t),lk=new Set((t.match(LINK)||[]).map(x=>x.toLowerCase())).size;
+     r.push(TONE.test(t)?['good','You describe the tone with an adjective.']:['warn','Name the tone with an adjective (e.g. sarcastic, polemical).']);
+     r.push(q>=4?['good',q+' line references found.']:['warn','Only '+q+' line reference(s) found. Aim for four, e.g. (l. 30).']);
+     r.push(/effect|reader|shows|suggests|emphasi[sz]|makes/i.test(t)?['good','You explain effects.']:['warn','Explain the effect: “This makes the reader …”']);
+     r.push(lk>=3?['good',lk+' different linking words.']:['warn','Use more linking words (furthermore, however, overall …).']);return r},
+   model:'Marcotte’s tone is sarcastic and openly polemical, which she creates mainly through irony, exaggeration and loaded language. She mocks tradwives as “these brave women of YouTube” (l. 30), ironically adopting their self-image as heroic defenders of tradition. Her hyperbolic list of what the fantasy wife “never” does, “never talks back, never gets tired, never says ‘no,’ and never gains weight” (ll. 32–33), uses anaphora to make the ideal look absurd. By addressing the reader directly as “you, male viewer” (l. 28), she exposes who the content is really aimed at. Furthermore, she labels opponents as a “far-right troll” (l. 17) and a “right-wing grifter” (l. 20), which discredits them before she discusses their arguments. Overall, the tone entertains readers who already share her views and makes her criticism memorable, but it may also alienate readers who sympathise with traditional lifestyles.'},
+  {id:'b2b',title:'Creative choice · The Creator answers',op:'re-create · AFB III',min:100,max:120,
+   prompt:'You are the Creator from last lesson’s role play. Write a comment under the article (100–120 words) that answers Marcotte calmly. Use two phrases from the “Sound nuanced, not vague” slide.',
+   checks:['I answer at least one specific point from the article.','My tone stays calm and polite.','I use two phrases from the “Sound nuanced” slide.','I stay in my role as the Creator.'],
+   tips:['Pick one claim, e.g. that viewers are “gullible” or that tradwives are hypocritical, and respond to it.','No insults. Calm disagreement is more convincing than anger.','e.g. “I see your point; however, …” · “We need to distinguish between … and …”','Write as “I”, the creator: talk about your channel, your followers, your choice.'],
+   auto:t=>{const n=new Set((t.match(NUANCE)||[]).map(x=>x.toLowerCase())).size;
+     return [n>=2?['good',n+' phrases from the slide found.']:['warn',n+' phrase(s) from the slide found. Use two, e.g. “I see your point; however, …”'],
+       /\b(bitch|stupid|idiot|liar)\b/i.test(t)?['warn','Some words sound aggressive. Keep the tone calm.']:['good','The tone seems calm.']]},
+   model:'I read your article with interest, and I see your point about unrealistic expectations; however, you describe my audience without ever asking them. Most of my followers are women who enjoy cooking and a slower routine, not lonely young men. Although my lifestyle is presented on camera, it is still a choice I made freely. We need to distinguish between a video that shows one way of living and a rule for all women. Yes, I earn money with my channel, but why is that hypocritical? A possible counterargument would be that feminism is about choice, and that includes mine.'}],
+ c1:[{id:'c1a',title:'Task 1 · Analyse and assess',op:'analyse + assess · AFB II/III',min:220,max:260,
+   prompt:'Explain how Marcotte’s sarcastic and polemical tone serves her argument, and assess whether it strengthens or weakens her credibility for different readers (Salon readers, young men, tradwife fans). 220–260 words.',
+   checks:['My thesis links tone and argument.','I support my analysis with quotes and line numbers.','I consider at least two different groups of readers.','I name strengths and weaknesses of the tone.','I end with a clear, justified judgement.','I use at least four chunks from the word list.'],
+   tips:['e.g. “Marcotte’s tone is not decoration; it is the main vehicle of her argument.”','Integrate short quotes into your sentences, with (l. …).','How would a Salon reader react? A young man who enjoys the videos? A tradwife fan?','Strength: memorable, exposes contradictions. Weakness: insults, little data, one example.','“On balance, …” Weigh both sides, then decide.','e.g. toxic fantasy, shell game, credulous audiences, aggressively opinionated.'],
+   auto:t=>{const r=[],q=cnt(lineRef,t),ch=chunksIn(t);
+     r.push(q>=3?['good',q+' line references found.']:['warn','Only '+q+' line reference(s). Support your analysis with quotes.']);
+     r.push(/\b(readers?|audiences?|viewers?|young men|fans)\b/gi.test(t)&&cnt(/\b(readers?|audiences?|viewers?|young men|fans)\b/gi,t)>=3?['good','You discuss the readership.']:['warn','Consider different groups of readers more explicitly.']);
+     r.push(/\b(however|whereas|nevertheless|on the other hand|while|although)\b/i.test(t)?['good','You weigh different sides.']:['warn','Show both sides: however, on the other hand, nevertheless …']);
+     r.push(/\b(on balance|overall|in conclusion|all in all|to conclude)\b/i.test(t)?['good','You signal a final judgement.']:['warn','End with a clear judgement (On balance, …).']);
+     r.push(ch.length>=4?['good','Chunks used ('+ch.length+'): '+ch.join(', ')+'.']:['warn','Chunks used ('+ch.length+')'+(ch.length?': '+ch.join(', '):'')+'. Aim for four.']);return r},
+   model:'Marcotte’s sarcastic, polemical tone is not decoration; it is the main vehicle of her argument. Her central claim, that tradwives are peddling fantasies of female submission and selling young men a “toxic fantasy” (l. 86), is made convincing less through evidence than through ridicule. Hyperbole such as the wife who “never gains weight, no matter how many children she has” (l. 33) exaggerates the ideal until its absurdity becomes obvious, and the image of “perfectly coiffed sex-robots” (l. 58) reduces it to something mechanical and unreal. Ironic phrases like “these brave women of YouTube” (l. 30) expose what she calls a “shell game” (l. 78): tradwives perform victimhood while running lucrative businesses.\n\nFor Salon’s progressive readership this tone is effective: it is entertaining, creates shared outrage and makes the contradictions easy to remember. For the young men she claims to worry about, however, it is likely to backfire. Labels such as “gullible” (l. 85) and “far-right troll” (l. 17) insult rather than persuade, and her own aggressively opinionated style mirrors the content she attacks. Moreover, her claim about a male audience rests on a single example (“Mrs. Midwest”) and on comment sections rather than data.\n\nOn balance, the tone strengthens the article as opinion journalism for like-minded readers, but it weakens its credibility as an argument that could reach the young men it claims to protect.'},
+  {id:'c1b',title:'Creative choice · Letter to the editor',op:'comment / re-create · AFB III',min:180,max:220,
+   prompt:'Write a letter to the editor (180–220 words) as a young male reader or as the Media Critic. Agree with one point and challenge one assumption, e.g. that viewers are simply “gullible”. Use at least four chunks from the word list.',
+   checks:['I use the conventions of a letter (greeting, reference to the article, sign-off).','I agree with one point and explain why.','I challenge one assumption with an argument.','I use at least four chunks from the word list.','My tone fits a published letter: clear, but not insulting.'],
+   tips:['Dear Editor, … I am writing in response to … · Yours faithfully, (name, town)','e.g. “Marcotte is right that …”','e.g. “However, I disagree with her assumption that …”','e.g. the male gaze, a neat marketing trick, credulous audiences, exploiting young men.','Strong opinions are fine. Insults weaken your letter.'],
+   auto:t=>{const r=[],ch=chunksIn(t);
+     r.push(/\bdear\b/i.test(t)&&/(yours (faithfully|sincerely)|best regards|kind regards)/i.test(t)?['good','Letter conventions found.']:['warn','Add a greeting (Dear Editor,) and a sign-off (Yours faithfully, …).']);
+     r.push(/(in response to|your article|marcotte)/i.test(t)?['good','You refer to the article.']:['warn','Refer to the article in your first sentence.']);
+     r.push(/\b(however|but|disagree|on the other hand)\b/i.test(t)?['good','You challenge a point.']:['warn','Make clear where you disagree (However, I disagree …).']);
+     r.push(ch.length>=4?['good','Chunks used ('+ch.length+'): '+ch.join(', ')+'.']:['warn','Chunks used ('+ch.length+')'+(ch.length?': '+ch.join(', '):'')+'. Aim for four.']);return r},
+   model:'Dear Editor,\n\nI am writing in response to Amanda Marcotte’s article “The insidious rise of ‘tradwives’” (Salon, 27 November 2023). As a 19-year-old man who regularly scrolls past this kind of content, I found it both accurate and frustrating.\n\nMarcotte is right that many of these videos are made for the male gaze. The perfect kitchens and the women who never seem tired are a neat marketing trick, and a steady stream of such clips can certainly shape what young men expect from a partner.\n\nHowever, I disagree with her assumption that viewers are simply “gullible”. Most of my friends know that influencers are performing; they watch for the same reason they watch fitness or travel videos. Calling us credulous audiences will not convince anyone. It only pushes young men towards the commentators who claim to take them seriously. If Marcotte really wants to stop right-wing influencers from exploiting young men, she should talk to them, not about them.\n\nThe debate needs less mockery and more honest conversations about relationships in schools, families and the media.\n\nYours faithfully,\nJonas M., Hamburg'}]};
+
+const DEVICES=['irony','sarcasm','hyperbole','loaded words / labels','direct address','metaphor','anaphora / repetition','rhetorical question','other'];
+const saved=store.get('tasks',{});
+function save(){store.set('tasks',saved)}
+function taskHTML(T){const s=saved[T.id]||{};return `<div class="card" id="c-${T.id}">
+ <div class="eyebrow">${esc(T.op)}</div><h3>${esc(T.title)}</h3><p>${esc(T.prompt)}</p>
+ ${T.scaffold?`<details open><summary>Plan with four questions</summary><ol>${T.scaffold.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></details>`:''}
+ ${T.table?`<div class="tbl"><table><thead><tr><th>Quote</th><th>Line</th><th>Device</th><th>Effect on the reader</th></tr></thead><tbody>
+   ${[0,1,2,3].map(r=>`<tr>${['q','l'].map(k=>`<td><input type="text" data-tt="${T.id}" data-k="${k}${r}" value="${esc((s.tt||{})[k+r]||'')}" aria-label="${k==='q'?'Quote':'Line'} ${r+1}"${k==='l'?' style="width:70px"':''}></td>`).join('')}
+   <td><select data-tt="${T.id}" data-k="d${r}" aria-label="Device ${r+1}"><option value=""></option>${DEVICES.map(d=>`<option${(s.tt||{})['d'+r]===d?' selected':''}>${d}</option>`).join('')}</select></td>
+   <td><input type="text" data-tt="${T.id}" data-k="e${r}" value="${esc((s.tt||{})['e'+r]||'')}" aria-label="Effect ${r+1}"></td></tr>`).join('')}</tbody></table></div>`:''}
+ ${T.starter?`<p class="small">Start: <i>${esc(T.starter)}</i></p>`:''}
+ <label for="ta-${T.id}" class="small">Your text</label>
+ <textarea id="ta-${T.id}" data-ta="${T.id}">${esc(s.text||'')}</textarea>
+ <div class="meter"><span id="wc-${T.id}">0 words</span><div class="bar"><i id="wb-${T.id}"></i></div><span>target ${T.min}–${T.max}</span></div>
+ <div class="row"><button class="primary" data-step="check" data-id="${T.id}">Check my text</button><button data-step="copy" data-id="${T.id}">Copy text</button></div>
+ <div id="fb-${T.id}"></div></div>`}
+function wc(T){const t=$('#ta-'+T.id).value,n=words(t);$('#wc-'+T.id).textContent=n+' words';
+  const b=$('#wb-'+T.id);b.style.width=Math.min(100,n/T.max*100)+'%';
+  b.style.background=n>=T.min&&n<=T.max?'var(--good)':n>T.max?'var(--warn)':'var(--accent)'}
+function checkStage(T){const s=saved[T.id]||(saved[T.id]={});const t=$('#ta-'+T.id).value,n=words(t);
+  if(n<Math.round(T.min*0.5)){$('#fb-'+T.id).innerHTML=`<div class="fb warn">Write a bit more first (at least ${Math.round(T.min*0.5)} words), then check.</div>`;return}
+  const auto=T.auto(t);const wcNote=n<T.min?['warn',`${n} words: a little short (target ${T.min}–${T.max}).`]:n>T.max?['warn',`${n} words: a little long. Cut repetition.`]:['good',`${n} words: right length.`];
+  const all=[wcNote,...auto];
+  $('#fb-'+T.id).innerHTML=`<div class="fb" style="background:var(--bg)"><b>Automatic check</b><ul>${all.map(a=>`<li style="color:var(--${a[0]==='good'?'good':a[0]==='bad'?'bad':'warn'})">${esc(a[1])}</li>`).join('')}</ul></div>
+   <div class="card" style="padding:14px"><b>Self-check: tick what is true for your text</b>
+   ${T.checks.map((c,i)=>`<label class="check"><input type="checkbox" data-ck="${T.id}" data-i="${i}"${(s.ck||[])[i]?' checked':''}><span>${esc(c)}</span></label>`).join('')}
+   <div class="row"><button class="primary" data-step="model" data-id="${T.id}">Get my feedback</button></div></div><div id="fb2-${T.id}"></div>`}
+function modelStage(T){const s=saved[T.id]||{};const ck=s.ck||[];const open=T.checks.map((c,i)=>ck[i]?null:i).filter(x=>x!=null);
+  $('#fb2-'+T.id).innerHTML=`${open.length?`<div class="fb warn"><b>Your next steps</b><ul>${open.map(i=>`<li>${esc(T.tips[i])}</li>`).join('')}</ul></div>`:`<div class="fb good"><b>All criteria ticked.</b> Now compare with the model answer: what did the model do better, what did you do better?</div>`}
+   <details${open.length?'':' open'}><summary>Model answer</summary><div class="model" style="margin-top:8px">${esc(T.model)}</div></details>
+   <p class="small">Revise your text, then check again. Ask your teacher for feedback on one point you are unsure about.</p>`;
+  $('#extra').hidden=false}
+function renderTrack(tr){$('#taskarea').innerHTML=TASKS[tr].map(taskHTML).join('');TASKS[tr].forEach(wc);$('#trackhint').hidden=true;
+  $('#extra').hidden=false}
+let cur=store.get('track',null);
+$$('[data-track]').forEach(b=>b.addEventListener('click',()=>{cur=b.dataset.track;store.set('track',cur);
+  $$('[data-track]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderTrack(cur)}));
+if(cur){const b=$(`[data-track="${cur}"]`);if(b)b.click()}
+const byId=id=>Object.values(TASKS).flat().find(T=>T.id===id);
+$('#taskarea').addEventListener('input',e=>{const el=e.target;
+  if(el.dataset.ta){const T=byId(el.dataset.ta);(saved[T.id]||(saved[T.id]={})).text=el.value;wc(T);save()}
+  if(el.dataset.tt){const s=saved[el.dataset.tt]||(saved[el.dataset.tt]={});(s.tt||(s.tt={}))[el.dataset.k]=el.value;save()}});
+$('#taskarea').addEventListener('change',e=>{const el=e.target;
+  if(el.dataset.tt){const s=saved[el.dataset.tt]||(saved[el.dataset.tt]={});(s.tt||(s.tt={}))[el.dataset.k]=el.value;save()}
+  if(el.dataset.ck){const s=saved[el.dataset.ck]||(saved[el.dataset.ck]={});(s.ck||(s.ck=[]))[+el.dataset.i]=el.checked;save()}});
+$('#taskarea').addEventListener('click',e=>{const b=e.target.closest('[data-step]');if(!b)return;const T=byId(b.dataset.id);
+  if(b.dataset.step==='check')checkStage(T);
+  if(b.dataset.step==='model')modelStage(T);
+  if(b.dataset.step==='copy'){const ta=$('#ta-'+T.id);const done=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy text',1500)};
+    try{navigator.clipboard.writeText(ta.value).then(done,()=>{ta.select()})}catch(_){ta.select()}}});
+
+/* ---------- Reflection ---------- */
+const CANDO=['I can sum up Marcotte’s main criticism.','I can explain how tone supports an argument.','I can use three new chunks from the text.'];
+const refl=store.get('refl',{l:{},s:'',d:''});
+$('#cando').innerHTML=`<h3>Did I reach today's goal?</h3>`+CANDO.map((c,i)=>`<div class="item"><span>${esc(c)}</span><div class="lights" role="group" aria-label="${esc(c)}">
+ ${[['green','Yes, I can'],['amber','Partly'],['red','Not yet']].map(v=>`<button data-li="${i}" data-v="${v[0]}" aria-pressed="${refl.l[i]===v[0]}">${v[1]}</button>`).join('')}</div></div>`).join('');
+$('#rsent').value=refl.s;$('#rdiff').value=refl.d;
+function ticket(){const n=CANDO.filter((_,i)=>refl.l[i]).length;const ch=chunksIn(refl.s);
+  $('#rsentfb').innerHTML=refl.s.trim()?(ch.length?`<div class="fb good">You used: ${esc(ch.join(', '))}.</div>`:`<div class="fb warn">No chunk from the word list found yet.</div>`):'';
+  if(!n){$('#ticketbody').textContent='Fill in the traffic lights above to complete your ticket.';return}
+  const lab={green:'Yes',amber:'Partly',red:'Not yet'};
+  $('#ticketbody').innerHTML=CANDO.map((c,i)=>`<div>${esc(c)} <b>${lab[refl.l[i]]||'–'}</b></div>`).join('')+
+   (refl.s.trim()?`<div>My sentence: <i>${esc(refl.s)}</i></div>`:'')+(refl.d.trim()?`<div>Still difficult: <i>${esc(refl.d)}</i></div>`:'')+
+   `<div class="mono">Vocab ${$('#v1s').textContent} · ${$('#v2s').textContent} · ${$('#v3s').textContent} · Reading ${$('#tfs').textContent}</div>`}
+$('#cando').addEventListener('click',e=>{const b=e.target.closest('[data-li]');if(!b)return;refl.l[b.dataset.li]=b.dataset.v;
+  $$(`[data-li="${b.dataset.li}"]`).forEach(x=>x.setAttribute('aria-pressed',x===b));store.set('refl',refl);ticket()});
+$('#rsent').addEventListener('input',e=>{refl.s=e.target.value;store.set('refl',refl);ticket()});
+$('#rdiff').addEventListener('input',e=>{refl.d=e.target.value;store.set('refl',refl);ticket()});
+ticket();
+
+/* reset (two-step, no confirm dialog) */
+let armed=false;$('#reset').addEventListener('click',e=>{if(!armed){armed=true;e.target.textContent='Click again to delete all answers';setTimeout(()=>{armed=false;e.target.textContent='Start again'},4000);return}
+  try{Object.keys(localStorage).filter(k=>k.startsWith('tw:')).forEach(k=>localStorage.removeItem(k))}catch(_){} location.reload()});
+})();
+</script>
+
+</html>
