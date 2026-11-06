@@ -1,0 +1,458 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Self-help Debate Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single study column with a sticky step bar; each step is one panel, like a workbook page */
+:root{
+  --bg:#F3F2F6; --surface:#FFFFFF; --fg:#211B2A; --muted:#625A6E; --line:#DCD6E4;
+  --accent:#1D71B8; --accent-soft:#E3EFF9; --good:#23734F; --good-soft:#E1F1E8;
+  --bad:#B33A2E; --bad-soft:#F8E4E1; --warn:#8A5A0B; --warn-soft:#FBEFD8;
+  --display:"Young Serif",Georgia,"Times New Roman",serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17141C; --surface:#211D28; --fg:#EEEAF3; --muted:#A79FB3; --line:#3A3445;
+  --accent:#7DB8EA; --accent-soft:#1B2E42; --good:#6CCB9B; --good-soft:#18342A;
+  --bad:#F08A7E; --bad-soft:#3E2220; --warn:#E8B860; --warn-soft:#3A2E17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17141C; --surface:#211D28; --fg:#EEEAF3; --muted:#A79FB3; --line:#3A3445;
+  --accent:#7DB8EA; --accent-soft:#1B2E42; --good:#6CCB9B; --good-soft:#18342A;
+  --bad:#F08A7E; --bad-soft:#3E2220; --warn:#E8B860; --warn-soft:#3A2E17; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+header.top{padding-block:28px 12px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,40px);line-height:1.1;margin:.2em 0 .1em;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:26px;line-height:1.2;margin:0 0 6px;text-wrap:balance}
+h3{font-size:18px;margin:0}
+p{margin:0}
+nav.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:8px 16px;display:flex;gap:6px;overflow-x:auto}
+nav.steps a{flex:none;text-decoration:none;color:var(--muted);font-weight:700;font-size:15px;padding:7px 12px;border-radius:999px;border:1px solid transparent}
+nav.steps a .t{font-family:var(--mono);font-weight:400;font-size:12px;margin-left:4px}
+nav.steps a[aria-current="page"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+nav.steps a:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section.panel{display:grid;gap:20px;padding-top:24px}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px;min-width:0}
+.goal{border-left:5px solid var(--accent)}
+.goal p.g{font-family:var(--display);font-size:21px;line-height:1.35}
+blockquote{margin:0;font-family:var(--display);font-size:20px;line-height:1.4;padding-left:14px;border-left:3px solid var(--line)}
+.timeline{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.timeline li{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:baseline}
+.timeline .min{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.levels{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;font-weight:700}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.lvl[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.item{display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0;padding-top:0}
+.item.ok{--mark:var(--good)} .item.no{--mark:var(--bad)}
+.item.ok,.item.no{box-shadow:inset 4px 0 0 var(--mark);padding-left:12px}
+select,textarea,input[type=text]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;max-width:100%}
+textarea{min-height:170px;resize:vertical;line-height:1.5}
+.small{font-size:14px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:13px}
+.score{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.fb{font-size:15px;border-radius:8px;padding:10px 12px}
+.fb.good{background:var(--good-soft);color:var(--good)} .fb.bad{background:var(--bad-soft);color:var(--bad)} .fb.warn{background:var(--warn-soft);color:var(--warn)}
+.fb ul{margin:4px 0 0;padding-left:20px}
+.choices{display:grid;gap:6px}
+.choices label{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:6px;cursor:pointer}
+.choices label:hover{background:var(--bg)}
+.choices label.right{background:var(--good-soft)} .choices label.wrong{background:var(--bad-soft)}
+.tf{display:flex;gap:8px}
+.tf button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.model{background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;white-space:pre-line}
+.check{display:flex;gap:10px;align-items:flex-start}
+.check input{margin-top:5px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.meter{display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden;max-width:220px}
+.bar i{display:block;height:100%;background:var(--accent);width:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top;font-size:15px}
+th{font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+td input,td select{padding:6px 8px;font-size:15px}
+details summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.lights{display:flex;gap:6px;flex-wrap:wrap}
+.lights button{font-weight:400;font-size:14px;padding:6px 10px}
+.lights button[data-v="green"][aria-pressed="true"]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.lights button[data-v="amber"][aria-pressed="true"]{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.lights button[data-v="red"][aria-pressed="true"]{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.ticket{border:2px solid var(--fg);border-radius:10px;padding:16px;display:grid;gap:8px}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+</style>
+<style>
+.sexi-k{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--fg);color:var(--bg);font-weight:700;align-items:center;justify-content:center;flex:none}
+.sx{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.deckcard{border:2px dashed var(--accent);border-radius:12px;padding:16px;display:grid;gap:8px;background:var(--surface)}
+.deckcard .ln{display:grid;grid-template-columns:24px 1fr;gap:8px}
+.deckcard .ln b{color:var(--accent)}
+.pill{display:inline-block;font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+</style>
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Eng 13 · The individual and society · Text 4</div>
+  <h1>Self-help: bunk or beneficial?</h1>
+  <p class="lead">Emily Goddard, “Self-help was meant to make me feel better. Instead it turned toxic – and borderline dangerous” (The Guardian, 2024). Reader, Text 4.</p>
+</header>
+<nav class="steps" aria-label="Lesson steps">
+  <a href="#goal" data-tab="goal">Goal</a>
+  <a href="#vocab" data-tab="vocab">Vocabulary</a>
+  <a href="#reading" data-tab="reading">Reading <span class="t">AFB I</span></a>
+  <a href="#sexi" data-tab="sexi">SEXI <span class="t">AFB II</span></a>
+  <a href="#debate" data-tab="debate">Debate prep <span class="t">AFB III</span></a>
+  <a href="#reflect" data-tab="reflect">Reflection</a>
+</nav>
+
+<section class="panel" id="p-goal">
+  <div class="card goal">
+    <div class="eyebrow">Today's goal</div>
+    <p class="g">By the end of this lesson, I can outline Emily Goddard's criticism of the self-help industry, build an argument with SEXI and take part in a debate on: Self-help – bunk or beneficial?</p>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Opinion barometer</div>
+    <p>How do you feel about self-help right now? <b>1 = total bunk</b> (Quatsch), <b>10 = really beneficial</b> (nützlich).</p>
+    <div class="row"><label for="baro1"><b>My number at the start:</b></label><select id="baro1" style="width:auto"><option value="">–</option>
+      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+    <p class="small">Say your number out loud when your teacher asks. You will rate again at the end.</p>
+  </div>
+  <div class="card">
+    <h3>Today's plan</h3>
+    <ol class="timeline">
+      <li><span class="min">0–3</span><span>Goal and opinion barometer</span></li>
+      <li><span class="min">3–11</span><span>Warm-up: helpful, harmless or harmful?</span></li>
+      <li><span class="min">11–22</span><span>Vocabulary and reading (AFB I)</span></li>
+      <li><span class="min">22–26</span><span>How to build an argument: SEXI (AFB II)</span></li>
+      <li><span class="min">26–48</span><span>Prepare for the debate: choose your side and level (AFB III)</span></li>
+      <li><span class="min">48–78</span><span>Fishbowl debate</span></li>
+      <li><span class="min">78–90</span><span>Reflection and exit ticket</span></li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3>Why this matters for the Abitur</h3>
+    <p>You <b>outline</b> a text (AFB I), <b>build and explain arguments</b> (AFB II) and <b>comment or discuss</b> (AFB III). Every body paragraph of an Abitur comment is one good SEXI argument.</p>
+  </div>
+</section>
+
+<section class="panel" id="p-vocab" hidden>
+  <div><h2>Vocabulary</h2><p class="lead">Start with Level 1. Every answer is checked straight away.</p></div>
+  <div class="levels" role="group" aria-label="Vocabulary level">
+    <button class="lvl" data-vl="1" aria-pressed="true">Level 1 · Match</button>
+    <button class="lvl" data-vl="2" aria-pressed="false">Level 2 · Use it</button>
+  </div>
+  <div class="card" id="v1">
+    <div class="row" style="justify-content:space-between"><h3>Match the chunk with its German meaning</h3><span class="score" id="v1s">0 / 8</span></div>
+    <div id="v1list"></div>
+    <div class="row"><button class="primary" id="v1check">Check my answers</button><button id="v1show" hidden>Show correct answers</button></div>
+    <div id="v1fb"></div>
+  </div>
+  <div class="card" id="v2" hidden>
+    <div class="row" style="justify-content:space-between"><h3>Complete the sentences</h3><span class="score" id="v2s">0 / 6</span></div>
+    <p class="small">Two chunks in the list are not needed.</p>
+    <div id="v2list"></div>
+    <div class="row"><button class="primary" id="v2check">Check my answers</button><button id="v2show" hidden>Show correct answers</button></div>
+    <div id="v2fb"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-reading" hidden>
+  <div><h2>Reading check <span class="pill">AFB I</span></h2><p class="lead">Read Text 4 first (or the B2 version). True or false? Each answer shows the line where you can check it.</p></div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h3>True or false?</h3><span class="score" id="tfs">0 / 8</span></div>
+    <div id="tflist"></div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h3>Emily's 15-year journey: put it in order</h3><span class="score" id="ords">0 / 5</span></div>
+    <div id="ordlist"></div>
+    <div class="row"><button class="primary" id="ordcheck">Check the order</button></div>
+    <div id="ordfb"></div>
+  </div>
+  <div class="card">
+    <h3>Outline in one sentence</h3>
+    <p class="small">What is Emily's main criticism of the self-help industry? Write one sentence, then compare.</p>
+    <textarea id="outl" style="min-height:90px" placeholder="In her article …, Emily Goddard criticises …"></textarea>
+    <div class="row"><button id="outlbtn">Check and compare</button></div>
+    <div id="outlfb"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-sexi" hidden>
+  <div><h2>SEXI training <span class="pill">AFB II</span></h2><p class="lead">A convincing argument has four parts. Train each part before you build your own.</p></div>
+  <div class="card">
+    <div class="sx"><span class="sexi-k">S</span><p><b>Statement</b> – your claim in one clear sentence.</p></div>
+    <div class="sx"><span class="sexi-k">E</span><p><b>Explanation</b> – why is it true?</p></div>
+    <div class="sx"><span class="sexi-k">X</span><p><b>eXample</b> – proof: a line from the text, a fact, a case.</p></div>
+    <div class="sx"><span class="sexi-k">I</span><p><b>Illustration</b> – a picture the audience can see: “Imagine …”, “It's like …”</p></div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h3>1 · Sort the argument</h3><span class="score" id="s1s">0 / 8</span></div>
+    <p class="small">Which part is each sentence: S, E, X or I?</p>
+    <div id="s1list"></div>
+    <div class="row"><button class="primary" id="s1check">Check</button></div>
+    <div id="s1fb"></div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h3>2 · Example or illustration?</h3><span class="score" id="s2s">0 / 6</span></div>
+    <p class="small">Proof (X) or picture (I)?</p>
+    <div id="s2list"></div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h3>3 · What's missing?</h3><span class="score" id="s3s">0 / 3</span></div>
+    <p class="small">Each argument lacks one part. Which one?</p>
+    <div id="s3list"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-debate" hidden>
+  <div><h2>Prepare for the debate <span class="pill">AFB III</span></h2><p class="lead">Choose your side and your level. Build your argument, check it, and use the debate card in the fishbowl.</p></div>
+  <div class="card">
+    <h3>My side</h3>
+    <div class="levels" role="group" aria-label="Team">
+      <button class="lvl" data-side="bunk" aria-pressed="false">Team Bunk (with Emily)</button>
+      <button class="lvl" data-side="ben" aria-pressed="false">Team Beneficial (with the guru)</button>
+    </div>
+    <h3>My level</h3>
+    <div class="levels" role="group" aria-label="Level">
+      <button class="lvl" data-lv="b1" aria-pressed="false">B1 · Step by step</button>
+      <button class="lvl" data-lv="b2" aria-pressed="false">B2 · On your own feet</button>
+      <button class="lvl" data-lv="c1" aria-pressed="false">C1 · Expert mode</button>
+    </div>
+    <p class="small" id="dhint">Choose a side and a level to see your tasks.</p>
+  </div>
+  <div id="darea"></div>
+</section>
+
+<section class="panel" id="p-reflect" hidden>
+  <div><h2>Reflection</h2><p class="lead">Be honest. This helps you and your teacher plan the next step.</p></div>
+  <div class="card" id="cando"></div>
+  <div class="card">
+    <h3>Opinion barometer, round 2</h3>
+    <div class="row"><label for="baro2"><b>My number now:</b></label><select id="baro2" style="width:auto"><option value="">–</option>
+      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+    <div id="barofb" class="small"></div>
+  </div>
+  <div class="card">
+    <h3>The strongest argument I heard today was …</h3>
+    <input type="text" id="rbest" placeholder="… because its example / illustration …">
+  </div>
+  <div class="card">
+    <h3>The SEXI part I want to improve</h3>
+    <div class="levels" role="group" aria-label="SEXI part">
+      <button class="lvl" data-imp="S" aria-pressed="false">S</button><button class="lvl" data-imp="E" aria-pressed="false">E</button><button class="lvl" data-imp="X" aria-pressed="false">X</button><button class="lvl" data-imp="I" aria-pressed="false">I</button>
+    </div>
+  </div>
+  <div class="ticket">
+    <div class="eyebrow">Exit ticket · show this to your teacher</div>
+    <div id="ticketbody" class="small">Fill in the traffic lights above to complete your ticket.</div>
+  </div>
+</section>
+
+<div class="foot small" style="margin-top:28px">
+  <span>Your answers stay on this iPad only. Nothing is sent anywhere.</span>
+  <button id="reset">Start again</button>
+</div>
+</div>
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem('sh:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('sh:'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shuffle(a,seed){a=a.slice();let s=seed||7;for(let i=a.length-1;i>0;i--){s=(s*9301+49297)%233280;const j=Math.floor(s/233280*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const words=t=>(t.trim().match(/[A-Za-z’'-]+/g)||[]).length;
+const fb=(cls,html)=>`<div class="fb ${cls}">${html}</div>`;
+
+/* tabs */
+const tabs=['goal','vocab','reading','sexi','debate','reflect'];
+function show(t){if(!tabs.includes(t))t='goal';tabs.forEach(x=>{$('#p-'+x).hidden=x!==t});
+  $$('nav.steps a').forEach(a=>a.setAttribute('aria-current',a.dataset.tab===t?'page':'false'));store.set('tab',t);if(t==='reflect')ticket();}
+$$('nav.steps a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();show(a.dataset.tab);try{history.replaceState(null,'','#'+a.dataset.tab)}catch(_){}window.scrollTo({top:0})}));
+
+/* barometer */
+['baro1','baro2'].forEach(id=>{const el=$('#'+id);el.value=store.get(id,'');el.addEventListener('change',()=>{store.set(id,el.value);baroFb();ticket()})});
+function baroFb(){const a=+$('#baro1').value,b=+$('#baro2').value;if(!a||!b){$('#barofb').textContent='';return}
+  $('#barofb').textContent=a===b?`You stayed at ${a}. What made you stay?`:`You moved from ${a} to ${b}. Which argument changed your mind?`}
+baroFb();
+
+/* chunks for detection */
+const CHUNKS=[['limiting beliefs',/limiting belief/i],['self-styled gurus',/self-styled/i],['bordered on dangerous',/border(ed|s)? on/i],['vulnerable to …',/vulnerable/i],
+ ['personal failing',/personal failing/i],['crutch',/crutch/i],['happiness conditional',/conditional/i],['imperfectly perfect',/imperfectly perfect/i],['dependency',/dependen/i],['toxic',/toxic/i]];
+const chunksIn=t=>CHUNKS.filter(c=>c[1].test(t)).map(c=>c[0]);
+
+/* vocab */
+$$('[data-vl]').forEach(b=>b.addEventListener('click',()=>{const l=b.dataset.vl;$$('[data-vl]').forEach(x=>x.setAttribute('aria-pressed',x===b));['1','2'].forEach(n=>$('#v'+n).hidden=n!==l);store.set('vl',l)}));
+{const l=store.get('vl','1');const b=$(`[data-vl="${l}"]`);if(b)b.click();}
+const V1=[['banish my limiting beliefs','meine selbstbegrenzenden Glaubenssätze verbannen'],['self-styled gurus','selbsternannte Gurus'],['bordered on dangerous','grenzte an Gefährlichkeit'],
+ ['vulnerable to the industry’s promises','anfällig für die Versprechen der Branche'],['my own personal failing','mein eigenes persönliches Versagen'],['my self-help crutch','meine Krücke der Selbsthilfe'],
+ ['it makes happiness conditional','es knüpft Glück an Bedingungen'],['accepting your imperfectly perfect self','dein unvollkommen perfektes Selbst annehmen']];
+const v1opts=shuffle(V1.map(x=>x[1]),11),v1s=store.get('v1',{});
+$('#v1list').innerHTML=V1.map((p,i)=>`<div class="item" id="v1i${i}"><label for="v1-${i}"><b>${esc(p[0])}</b></label><select id="v1-${i}"><option value="">Choose …</option>${v1opts.map(o=>`<option${v1s[i]===o?' selected':''}>${esc(o)}</option>`).join('')}</select></div>`).join('');
+$('#v1list').addEventListener('change',()=>{const s={};V1.forEach((_,i)=>s[i]=$('#v1-'+i).value);store.set('v1',s)});
+$('#v1check').addEventListener('click',()=>{let n=0,e=0;V1.forEach((p,i)=>{const v=$('#v1-'+i).value,it=$('#v1i'+i);it.classList.remove('ok','no');if(!v){e++;return}if(v===p[1]){n++;it.classList.add('ok')}else it.classList.add('no')});
+  $('#v1s').textContent=n+' / 8';store.set('v1score',n);$('#v1show').hidden=n===8;
+  $('#v1fb').innerHTML=n===8?fb('good','All correct. Go on to Level 2.'):fb(n>=6?'warn':'bad',`${n} of 8 correct${e?`, ${e} still empty`:''}. Change the red ones and check again.`)});
+$('#v1show').addEventListener('click',()=>{V1.forEach((p,i)=>$('#v1-'+i).value=p[1]);$('#v1check').click()});
+const V2BANK=['self-styled gurus','vulnerable to the industry’s promises','bordered on dangerous','my own personal failing','crutch','makes happiness conditional','limiting beliefs','imperfectly perfect'];
+const V2=[['Many','self-styled gurus','on TikTok have no training in psychology.'],['After her father’s death, Emily was especially','vulnerable to the industry’s promises','.'],
+ ['Telling ill people to ignore their symptoms','bordered on dangerous','.'],['When nothing worked, Emily saw it as','my own personal failing',', not the industry’s.'],
+ ['For years, self-help was a','crutch','that stopped her from walking on her own.'],['“Only when I’m slim can I be happy.” This kind of thinking','makes happiness conditional','.']];
+const v2opts=shuffle(V2BANK,5),v2s=store.get('v2',{});
+$('#v2list').innerHTML=V2.map((s,i)=>`<div class="item" id="v2i${i}"><label for="v2-${i}">${i+1}. ${esc(s[0])} ___ ${esc(s[2])}</label><select id="v2-${i}"><option value="">Choose …</option>${v2opts.map(o=>`<option${v2s[i]===o?' selected':''}>${esc(o)}</option>`).join('')}</select></div>`).join('');
+$('#v2list').addEventListener('change',()=>{const s={};V2.forEach((_,i)=>s[i]=$('#v2-'+i).value);store.set('v2',s)});
+$('#v2check').addEventListener('click',()=>{let n=0;V2.forEach((s,i)=>{const v=$('#v2-'+i).value,it=$('#v2i'+i);it.classList.remove('ok','no');if(!v)return;if(v===s[1]){n++;it.classList.add('ok')}else it.classList.add('no')});
+  $('#v2s').textContent=n+' / 6';$('#v2show').hidden=n===6;
+  $('#v2fb').innerHTML=n===6?fb('good','All correct. Now go to the reading check.'):fb(n>=4?'warn':'bad',`${n} of 6 correct. Read the whole sentence again: does the chunk fit the meaning and the grammar?`)});
+$('#v2show').addEventListener('click',()=>{V2.forEach((s,i)=>$('#v2-'+i).value=s[1]);$('#v2check').click()});
+
+/* reading: true/false */
+const TF=[['Emily bought her first self-help book when she was in a happy relationship.',false,'ll. 1–2: she was in “one of the most toxic relationships” of her life.'],
+ ['Over 15 years, she bought hundreds of self-help books, courses and apps.',true,'ll. 7–8.'],
+ ['All the advice she got was dangerous.',false,'ll. 13–14: some approaches were “gentle and perhaps even obvious”.'],
+ ['She was encouraged to spend money she could not afford in order to “manifest” wealth.',true,'ll. 14–15.'],
+ ['Her childhood made her vulnerable to the industry’s promises.',true,'ll. 18–19: addiction and domestic conflict at home.'],
+ ['After her father’s death, reading about grief helped her to grieve.',false,'ll. 22–25: ironically, she was not doing what she needed: crying, processing the loss.'],
+ ['Following the advice cured her multiple sclerosis.',false,'ll. 29–31: her brain scans still showed an incurable disease.'],
+ ['In the end she thinks that perhaps she never needed fixing at all.',true,'ll. 46–47.']];
+const tfs=store.get('tf',{});
+function tfRender(){let n=0;$('#tflist').innerHTML=TF.map((q,i)=>{const a=tfs[i];let cls='',f='';
+  if(a!=null){const ok=a===q[1];if(ok)n++;cls=ok?'ok':'no';f=fb(ok?'good':'bad',(ok?'Correct. ':'Not quite. ')+esc(q[2]))}
+  return `<div class="item ${cls}"><span>${i+1}. ${esc(q[0])}</span><div class="tf"><button data-tf="${i}" data-a="1" aria-pressed="${a===true}">True</button><button data-tf="${i}" data-a="0" aria-pressed="${a===false}">False</button></div>${f}</div>`}).join('');
+  $('#tfs').textContent=n+' / 8';store.set('tfscore',n)}
+$('#tflist').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(!b)return;tfs[b.dataset.tf]=b.dataset.a==='1';store.set('tf',tfs);tfRender()});
+tfRender();
+/* reading: order */
+const ORD=[['She buys her first self-help book in her mid-20s and is immediately hooked.',1],['She follows gurus online and tries manifesting and hypnosis.',2],
+ ['Her father dies, and she reads about grief instead of grieving.',3],['She stocks up on content again and blames herself when nothing helps.',4],['A conversation with a loved one helps her quit and accept herself.',5]];
+const ordShown=shuffle(ORD,3),ords=store.get('ord',{});
+$('#ordlist').innerHTML=ordShown.map((o,i)=>`<div class="item" id="oi${i}"><label for="o-${i}">${esc(o[0])}</label><select id="o-${i}" style="width:auto"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option${ords[i]==n?' selected':''}>${n}</option>`).join('')}</select></div>`).join('');
+$('#ordlist').addEventListener('change',()=>{const s={};ordShown.forEach((_,i)=>s[i]=$('#o-'+i).value);store.set('ord',s)});
+$('#ordcheck').addEventListener('click',()=>{let n=0;ordShown.forEach((o,i)=>{const v=+$('#o-'+i).value,it=$('#oi'+i);it.classList.remove('ok','no');if(!v)return;if(v===o[1]){n++;it.classList.add('ok')}else it.classList.add('no')});
+  $('#ords').textContent=n+' / 5';$('#ordfb').innerHTML=n===5?fb('good','Perfect order.'):fb('warn',`${n} of 5 in the right place. Look for the time words in the text: “mid-20s”, “over the next 15 years”, “2022”, “the start of this year”.`)});
+/* reading: outline */
+$('#outl').value=store.get('outl','');$('#outl').addEventListener('input',()=>store.set('outl',$('#outl').value));
+$('#outlbtn').addEventListener('click',()=>{const t=$('#outl').value,r=[];
+  if(words(t)<10){$('#outlfb').innerHTML=fb('warn','Write one full sentence first (at least 10 words).');return}
+  r.push(/goddard/i.test(t)?['good','You name the author.']:['warn','Name the author: Emily Goddard.']);
+  const pts=[/promis|work|help/i,/danger|harm|money|health/i,/blame|fault|failing/i,/vulnerab|dependen|hook|addict/i,/conditional|joy|accept/i].filter(re=>re.test(t)).length;
+  r.push(pts>=2?['good',`You mention ${pts} points of criticism.`]:['warn','Mention at least two points: empty promises, dangerous advice, blaming yourself, dependency, conditional happiness.']);
+  if(/\b(I think|in my opinion|I believe)\b/i.test(t))r.push(['warn','An outline has no opinion. Leave out “I think”.']);
+  if(/[“"][^”"]{12,}[”"]/.test(t))r.push(['warn','Use your own words, not a quote.']);
+  $('#outlfb').innerHTML=r.map(x=>fb(x[0],x[1])).join('')+`<details><summary>Model answer</summary><div class="model">In her article in The Guardian (2024), Emily Goddard criticises the self-help industry for making big promises it cannot keep, for giving advice that can be dangerous and for making vulnerable people dependent on it, so that they blame themselves when it fails.</div></details>`});
+
+/* SEXI 1: sort */
+const S1=[['Self-help makes people blame themselves.','S'],['When the advice does not work, the message is that you did not try hard enough.','E'],
+ ['Goddard felt that not getting results was “my own personal failing, rather than the industry’s” (ll. 31–32).','X'],['It’s like a gym that sells you a broken machine and then tells you that you are lazy.','I'],
+ ['Some simple self-help tips really work.','S'],['Small habits like sleeping enough or being kind to yourself improve how you feel and cost nothing.','E'],
+ ['Even Goddard calls “talk kindly to yourself, get enough sleep” gentle advice (ll. 13–14).','X'],['Imagine a stressed student before the Abitur who goes to bed an hour earlier and feels calmer within a week.','I']];
+const s1Shown=[...shuffle(S1.slice(0,4),4).map(x=>[...x,'Team Bunk']),...shuffle(S1.slice(4),9).map(x=>[...x,'Team Beneficial'])],s1v=store.get('s1',{});
+$('#s1list').innerHTML=s1Shown.map((q,i)=>`${i===0||i===4?`<p class="small"><b>${q[2]}</b></p>`:''}<div class="item" id="s1i${i}"><label for="s1-${i}">${esc(q[0])}</label><select id="s1-${i}" style="width:auto"><option value="">–</option>${['S','E','X','I'].map(k=>`<option${s1v[i]===k?' selected':''}>${k}</option>`).join('')}</select></div>`).join('');
+$('#s1list').addEventListener('change',()=>{const s={};s1Shown.forEach((_,i)=>s[i]=$('#s1-'+i).value);store.set('s1',s)});
+$('#s1check').addEventListener('click',()=>{let n=0;s1Shown.forEach((q,i)=>{const v=$('#s1-'+i).value,it=$('#s1i'+i);it.classList.remove('ok','no');if(!v)return;if(v===q[1]){n++;it.classList.add('ok')}else it.classList.add('no')});
+  $('#s1s').textContent=n+' / 8';store.set('s1score',n);
+  $('#s1fb').innerHTML=n===8?fb('good','All correct. You can see how S → E → X → I build up.'):fb('warn',`${n} of 8 correct. Tip: X has proof (a line or a fact), I has a picture (“Imagine …”, “It’s like …”).`)});
+/* SEXI 2: X or I */
+const S2=[['Goddard bought hundreds of books, courses and apps in 15 years (ll. 7–8).','X'],['Picture yourself scrolling through guru videos at 2 a.m., hoping the next one will fix your life.','I'],
+ ['Goddard was told to ignore her health problems in order to feel healthy (ll. 15–16).','X'],['It’s like taking a painkiller for a broken leg and then trying to run a marathon.','I'],
+ ['A self-help book costs about 15 euros, while a place in therapy can take months to get.','X'],['Imagine a friend who says “just think positive” every time you tell her about a real problem.','I']];
+const s2v=store.get('s2',{});
+function s2Render(){let n=0;$('#s2list').innerHTML=S2.map((q,i)=>{const a=s2v[i];let cls='',f='';
+  if(a){const ok=a===q[1];if(ok)n++;cls=ok?'ok':'no';f=fb(ok?'good':'bad',ok?'Correct.':(q[1]==='X'?'This is proof: a fact or a line from the text.':'This is a picture or comparison the audience can imagine.'))}
+  return `<div class="item ${cls}"><span>${i+1}. ${esc(q[0])}</span><div class="tf"><button data-s2="${i}" data-a="X" aria-pressed="${a==='X'}">X · example</button><button data-s2="${i}" data-a="I" aria-pressed="${a==='I'}">I · illustration</button></div>${f}</div>`}).join('');
+  $('#s2s').textContent=n+' / 6';store.set('s2score',n)}
+$('#s2list').addEventListener('click',e=>{const b=e.target.closest('[data-s2]');if(!b)return;s2v[b.dataset.s2]=b.dataset.a;store.set('s2',s2v);s2Render()});s2Render();
+/* SEXI 3: missing */
+const S3=[['Self-help is mainly a business. Gurus earn money by selling the next course, not by solving your problems. Imagine a doctor who only gets paid as long as you stay ill.','X','There is no proof. Add an example, e.g. Goddard bought hundreds of books, courses and apps (ll. 7–8).'],
+ ['Self-help can motivate people to change. For example, many phone apps remind people to drink water or to move. Imagine your phone telling you to stand up after an hour of homework.','E','It says what, but not why. Add an explanation, e.g. “This is because small reminders turn good ideas into habits.”'],
+ ['Self-help can be dangerous. Some gurus give advice that can harm people’s health or money. Goddard was encouraged to “manifest” wealth by spending more money than she could afford (ll. 14–15).','I','There is no picture. Add an illustration, e.g. “Imagine someone with a serious illness who skips the doctor because a guru says ‘think healthy’.”']];
+const s3v=store.get('s3',{});
+function s3Render(){let n=0;$('#s3list').innerHTML=S3.map((q,i)=>{const a=s3v[i];let cls='',f='';
+  if(a){const ok=a===q[1];if(ok)n++;cls=ok?'ok':'no';f=fb(ok?'good':'bad',(ok?'Correct. ':'Not quite. ')+esc(q[2]))}
+  return `<div class="item ${cls}"><span>${i+1}. ${esc(q[0])}</span><div class="tf">${['S','E','X','I'].map(k=>`<button data-s3="${i}" data-a="${k}" aria-pressed="${a===k}">${k}</button>`).join('')}</div>${f}</div>`}).join('');
+  $('#s3s').textContent=n+' / 3';store.set('s3score',n)}
+$('#s3list').addEventListener('click',e=>{const b=e.target.closest('[data-s3]');if(!b)return;s3v[b.dataset.s3]=b.dataset.a;store.set('s3',s3v);s3Render()});s3Render();
+
+/* ---------- Debate prep ---------- */
+const BANK={bunk:['Self-help can be dangerous.','Self-help makes people blame themselves.','Self-help is mainly a business.'],
+ ben:['Some simple self-help tips really work.','Self-help is cheap and easy to get.','Self-help can motivate people to change.']};
+const XBANK=['Emily was told to spend money she could not afford to “manifest” wealth (ll. 14–15).','Emily calls “talk kindly to yourself, get enough sleep” gentle advice (ll. 13–14).',
+ 'When nothing helped, Emily saw it as “my own personal failing” (ll. 31–32).','Emily bought hundreds of books, courses and apps in 15 years (ll. 7–9).',
+ 'A self-help book costs about 15 euros; a place in therapy can take months.','Many apps remind you to sleep, move or drink water – small habits that help.'];
+function checkSEXI(a){const r=[];const S=a.S||'',E=a.E||'',X=a.X||'',I=a.I||'';
+  const sw=words(S),sn=(S.match(/[.!?](\s|$)/g)||[]).length;
+  r.push(!sw?['warn','S: write your statement.']:sw>25||sn>1?['warn','S: keep your claim to one short sentence.']:['good','S: clear, one-sentence claim.']);
+  r.push(words(E)<6?['warn','E: explain why your statement is true (at least one full sentence).']:/\b(because|since|this means|this is why|that is why|as a result|so|which|therefore)\b/i.test(E)?['good','E: you explain why.']:['warn','E: show the reason, e.g. “This is because …”.']);
+  r.push(words(X)<5?['warn','X: give proof – a line from the text, a fact or a case.']:/(ll?\.\s*\d+)|\b(for example|for instance|according to|goddard|emily|study|studies|\d+)\b/i.test(X)?['good','X: you give concrete proof.']:['warn','X: make it concrete – add a line (l. …), a name or a fact.']);
+  r.push(words(I)<5?['warn','I: paint a picture for your audience.']:/\b(imagine|picture|it'?s like|it’s like|just think|think of|as if|like a)\b/i.test(I)?['good','I: your audience can see it.']:['warn','I: start with “Imagine …” or “It’s like …” to make it visual.']);
+  return r}
+const d=store.get('d',{});const save=()=>store.set('d',d);
+function ta(id,ph,h){return `<textarea id="${id}" style="min-height:${h||70}px" placeholder="${esc(ph||'')}">${esc(d[id]||'')}</textarea>`}
+function sexiForm(p,st){return ['S','E','X','I'].map(k=>`<div class="sx"><span class="sexi-k">${k}</span><div style="display:grid;gap:4px"><label for="${p}${k}" class="small">${{S:'Statement',E:'Explanation',X:'eXample',I:'Illustration'}[k]}</label>${ta(p+k,st?st[k]:'')}</div></div>`).join('')}
+const MODEL={bunk:'S  Self-help makes people blame themselves.\nE  When the advice does not work, the message is that you did not try hard enough, so failure feels personal.\nX  Goddard saw not getting results as “my own personal failing, rather than the industry’s” (ll. 31–32).\nI  It’s like a gym selling you a broken machine and then telling you that you are too lazy.',
+ ben:'S  Some simple self-help tips really work.\nE  Small, evidence-based habits like sleep or self-kindness improve wellbeing and cost nothing.\nX  Even Goddard calls “talk kindly to yourself, get enough sleep” gentle advice (ll. 13–14).\nI  Imagine a stressed student before the Abitur who goes to bed an hour earlier and feels calmer within a week.'};
+function renderDebate(){const side=d.side,lv=d.lv;
+  $$('[data-side]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.side===side));$$('[data-lv]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lv===lv));
+  if(!side||!lv){$('#dhint').hidden=false;$('#darea').innerHTML='';return}$('#dhint').hidden=true;
+  const team=side==='bunk'?'Team Bunk':'Team Beneficial';let h='';
+  if(lv==='b1'){h+=`<div class="card"><h3>Step 1 · Choose your statement (S)</h3><div class="choices">${BANK[side].map((s,i)=>`<label><input type="radio" name="b1s" value="${esc(s)}"${d.a1S===s?' checked':''}> <span>${esc(s)}</span></label>`).join('')}</div>
+   <h3>Step 2 · Choose a matching example (X)</h3><select id="b1x"><option value="">Choose …</option>${XBANK.map(x=>`<option${d.a1X===x?' selected':''}>${esc(x)}</option>`).join('')}</select>
+   <h3>Step 3 · Write E and I</h3>
+   <div class="sx"><span class="sexi-k">E</span><div>${ta('a1E','This is because …')}</div></div>
+   <div class="sx"><span class="sexi-k">I</span><div>${ta('a1I','Imagine … / It’s like …')}</div></div>
+   <h3>Your opener: an honest slogan</h3><p class="small">Example: “Think it, and it will be yours!” → “Thinking about money won’t pay your bills – but a budget might help.”</p>${ta('slogan','My honest slogan …',60)}
+   <div class="row"><button class="primary" data-chk="a1">Check my argument</button></div><div id="fb-a1"></div></div>`}
+  else{h+=`<div class="card"><h3>Argument 1</h3>${sexiForm('a1')}<div class="row"><button class="primary" data-chk="a1">Check argument 1</button></div><div id="fb-a1"></div></div>
+   <div class="card"><h3>Argument 2</h3>${sexiForm('a2')}<div class="row"><button class="primary" data-chk="a2">Check argument 2</button></div><div id="fb-a2"></div></div>`;
+   if(lv==='b2')h+=`<div class="card"><h3>Think ahead: the other team will say …</h3>${ta('other','They will probably say that …',60)}<h3>My reply</h3>${ta('reply','I see your point, but … (add an example or an illustration)',70)}<div class="row"><button data-chk="reply">Check my reply</button></div><div id="fb-reply"></div>
+     <h3>My 30-second role statement</h3><select id="role"><option value="">Choose a role …</option>${['a former follower of a self-help guru','a family doctor','a self-help influencer','a student who uses a sleep app'].map(r=>`<option${d.role===r?' selected':''}>${r}</option>`).join('')}</select>${ta('rolest','In the voice of your role, about 70–80 words …',120)}<div class="row"><button data-chk="rolest">Check my statement</button></div><div id="fb-rolest"></div></div>`;
+   else h+=`<div class="card"><h3>Steelman and rebut</h3><p class="small">The strongest argument of the other side, and your rebuttal (“Granted, … but …”).</p>${ta('steel','Their strongest argument is …',60)}${ta('rebut','Granted, … but …',70)}<div class="row"><button data-chk="rebut">Check</button></div><div id="fb-rebut"></div>
+     <h3>Opening speech (1 minute, about 130 words)</h3><p class="small">${side==='bunk'?'You speak as Emily Goddard.':'You speak as a famous self-help guru: big promises, a success story, direct address.'} Hook → SEXI 1 → SEXI 2 → strong final line.</p>${ta('speech','Ladies and gentlemen, imagine …',220)}<div class="row"><button class="primary" data-chk="speech">Check my speech</button></div><div id="fb-speech"></div></div>`}
+  h+=`<div class="card"><h3>My debate card</h3><p class="small">Show this in the hot seat. It updates while you write.</p><div class="deckcard" id="dcard"></div>
+   <details><summary>Compare with a model argument (${team})</summary><div class="model">${esc(MODEL[side])}</div></details></div>`;
+  $('#darea').innerHTML=h;renderCard()}
+function argOf(p){if(p==='a1'&&d.lv==='b1')return{S:d.a1S||'',E:d.a1E||'',X:d.a1X||'',I:d.a1I||''};return{S:d[p+'S']||'',E:d[p+'E']||'',X:d[p+'X']||'',I:d[p+'I']||''}}
+function renderCard(){const el=$('#dcard');if(!el)return;const a=argOf('a1');const line=(k,t)=>`<div class="ln"><b>${k}</b><span>${t?esc(t):'<span class="small">…</span>'}</span></div>`;
+  el.innerHTML=`<div class="eyebrow">${d.side==='bunk'?'Team Bunk':'Team Beneficial'} · ${d.lv.toUpperCase()}</div>${d.lv==='b1'&&d.slogan?`<p><i>${esc(d.slogan)}</i></p>`:''}${['S','E','X','I'].map(k=>line(k,a[k])).join('')}${d.reply?`<div class="ln"><b>↩</b><span>${esc(d.reply)}</span></div>`:''}`}
+$$('[data-side]').forEach(b=>b.addEventListener('click',()=>{d.side=b.dataset.side;save();renderDebate()}));
+$$('[data-lv]').forEach(b=>b.addEventListener('click',()=>{d.lv=b.dataset.lv;save();renderDebate()}));
+$('#darea').addEventListener('input',e=>{const t=e.target;if(t.id){d[t.id]=t.value;save();renderCard()}});
+$('#darea').addEventListener('change',e=>{const t=e.target;if(t.name==='b1s'){d.a1S=t.value}else if(t.id==='b1x'){d.a1X=t.value}else if(t.id==='role'){d.role=t.value}else return;save();renderCard()});
+$('#darea').addEventListener('click',e=>{const k=e.target.dataset&&e.target.dataset.chk;if(!k)return;let r=[];
+  if(k==='a1'||k==='a2'){r=checkSEXI(argOf(k));const ch=chunksIn(Object.values(argOf(k)).join(' '));r.push(ch.length?['good','Chunks from the text: '+ch.join(', ')+'.']:['warn','Try to use one chunk from the text (e.g. self-styled gurus, vulnerable, crutch).']);
+    store.set('sexiok',Math.max(store.get('sexiok',0),r.filter(x=>x[0]==='good').length))}
+  else if(k==='reply'){const t=d.reply||'';r.push(words(t)<10?['warn','Write at least one full sentence.']:['good','Good length.']);r.push(/\b(but|however|even so|that may be true|granted|admittedly)\b/i.test(t)?['good','You react to the other side.']:['warn','Start with “I see your point, but …” or “That may be true, however …”.']);r.push(/\b(imagine|like|for example|ll?\.\s*\d+)/i.test(t)?['good','You back it up with X or I.']:['warn','Add an example (X) or an illustration (I).'])}
+  else if(k==='rolest'){const t=d.rolest||'',w=words(t);r.push(!d.role?['warn','Choose a role first.']:['good','Role: '+esc(d.role)+'.']);r.push(w>=60&&w<=95?['good',w+' words – about 30 seconds.']:['warn',w+' words. Aim for 70–80.']);r.push(/\b(I|my|me)\b/.test(t)?['good','You speak in the first person.']:['warn','Speak as your role: use I / my.']);const ch=chunksIn(t);r.push(ch.length?['good','Chunk used: '+ch.join(', ')+'.']:['warn','Use one chunk from the text.'])}
+  else if(k==='rebut'){r.push(words(d.steel||'')>=8?['good','You name the other side’s argument.']:['warn','Name their strongest argument fairly.']);r.push(/\b(granted|admittedly|while|although)\b/i.test(d.rebut||'')&&/\b(but|however|yet|still)\b/i.test(d.rebut||'')?['good','Concession + counter: well done.']:['warn','Use “Granted, … but …” to concede first, then rebut.'])}
+  else if(k==='speech'){const t=d.speech||'',w=words(t);r.push(w>=110&&w<=160?['good',w+' words – about one minute.']:['warn',w+' words. Aim for about 130.']);
+    r.push(/\?|^\s*imagine|^\s*(ladies|picture|what if)/i.test(t)?['good','You have a hook.']:['warn','Start with a hook: a question, a striking fact or “Imagine …”.']);
+    r.push(/(ll?\.\s*\d+)|goddard|emily|for example/i.test(t)?['good','You use evidence.']:['warn','Add evidence (X): a line or a fact.']);
+    r.push(/\b(imagine|it'?s like|it’s like|picture)\b/i.test(t)?['good','You illustrate.']:['warn','Add an illustration (I).']);
+    r.push(/\b(so|therefore|that is why|in the end|let me be clear|all things considered)\b[^.]*[.!]\s*$/i.test(t.trim())?['good','Strong final line.']:['warn','End with a clear final line (e.g. “So let me be clear: …”).'])}
+  $('#fb-'+k).innerHTML=r.map(x=>fb(x[0],x[1])).join('')});
+renderDebate();
+
+/* ---------- Reflection ---------- */
+const CANDO=['I can outline Emily Goddard’s criticism of the self-help industry. (AFB I)','I can build an argument with SEXI. (AFB II)','I can use my argument in a debate. (AFB III)'];
+const cd=store.get('cd',{});
+$('#cando').innerHTML='<h3>Today’s goal: how far did you get?</h3>'+CANDO.map((c,i)=>`<div class="item"><span>${esc(c)}</span><div class="lights">${[['green','Yes, confidently'],['amber','Partly'],['red','Not yet']].map(v=>`<button data-cd="${i}" data-v="${v[0]}" aria-pressed="${cd[i]===v[0]}">${v[1]}</button>`).join('')}</div></div>`).join('');
+$('#cando').addEventListener('click',e=>{const b=e.target.closest('[data-cd]');if(!b)return;cd[b.dataset.cd]=b.dataset.v;store.set('cd',cd);$$(`[data-cd="${b.dataset.cd}"]`).forEach(x=>x.setAttribute('aria-pressed',x===b));ticket()});
+$('#rbest').value=store.get('rbest','');$('#rbest').addEventListener('input',()=>{store.set('rbest',$('#rbest').value);ticket()});
+$$('[data-imp]').forEach(b=>{b.setAttribute('aria-pressed',store.get('imp','')===b.dataset.imp);b.addEventListener('click',()=>{store.set('imp',b.dataset.imp);$$('[data-imp]').forEach(x=>x.setAttribute('aria-pressed',x===b));ticket()})});
+function ticket(){const lab={green:'🟢 yes',amber:'🟡 partly',red:'🔴 not yet'};
+  if(Object.keys(cd).length<3){$('#ticketbody').textContent='Fill in the traffic lights above to complete your ticket.';return}
+  $('#ticketbody').innerHTML=`<div>Outline (AFB I): <b>${lab[cd[0]]}</b> · SEXI (AFB II): <b>${lab[cd[1]]}</b> · Debate (AFB III): <b>${lab[cd[2]]}</b></div>
+   <div>Reading check: <b>${store.get('tfscore',0)}/8</b> · SEXI sort: <b>${store.get('s1score',0)}/8</b> · X or I: <b>${store.get('s2score',0)}/6</b></div>
+   <div>Barometer: <b>${$('#baro1').value||'–'} → ${$('#baro2').value||'–'}</b> · Side: <b>${d.side==='bunk'?'Team Bunk':d.side==='ben'?'Team Beneficial':'–'}</b> · Level: <b>${(d.lv||'–').toUpperCase()}</b></div>
+   <div>Strongest argument: <i>${esc($('#rbest').value||'–')}</i></div><div>I want to improve: <b>${store.get('imp','–')}</b></div>`}
+
+$('#reset').addEventListener('click',()=>{if(!confirm('Delete all your answers on this iPad and start again?'))return;try{Object.keys(localStorage).filter(k=>k.startsWith('sh:')).forEach(k=>localStorage.removeItem(k))}catch(e){}location.hash='';location.reload()});
+show((location.hash||'').slice(1)||store.get('tab','goal'));
+})();
+</script>
