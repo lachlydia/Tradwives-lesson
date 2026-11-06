@@ -136,6 +136,14 @@ details summary{cursor:pointer;font-weight:700;color:var(--accent)}
     <div class="row" style="justify-content:space-between"><h3>My progress</h3><button id="refresh">Update</button></div>
     <div id="progress"></div>
   </div>
+  <div class="card">
+    <h3>Hand in my results</h3>
+    <p class="small">Type your name, copy your results and paste them where your teacher tells you (e.g. IServ or Teams).</p>
+    <input type="text" id="sname" placeholder="First name and last name" autocomplete="name">
+    <div class="row"><button class="primary" id="copyres">Copy my results</button></div>
+    <textarea id="restext" readonly style="min-height:150px" hidden></textarea>
+    <div id="copyfb"></div>
+  </div>
 </section>
 
 <section class="panel" id="p-cards" hidden>
@@ -345,6 +353,17 @@ function progress(){const k=Object.values(store.get('known',{})).filter(v=>v===t
  const row=(l,v,max)=>`<div class="meter"><span style="min-width:120px">${l}</span><span class="bar"><i style="width:${Math.round(100*v/max)}%"></i></span><span>${v} / ${max}</span></div>`;
  $('#progress').innerHTML=row('Flashcards known',k,15)+row('Match',m,15)+row('Gap fill',store.get('gscore',0),10)+row('Type it',Object.keys(store.get('tdone',{})).length,15)+row('Use it',Object.keys(store.get('udone',{})).length,6)+row('Text check',store.get('tfscore',0),8)}
 $('#refresh').addEventListener('click',progress);
+$('#sname').value=store.get('sname','');$('#sname').addEventListener('input',()=>store.set('sname',$('#sname').value));
+function resultText(){const kn=store.get('known',{}),ms=store.get('mscore',{}),m=(ms[0]||0)+(ms[1]||0)+(ms[2]||0);
+ const notyet=C.filter((c,i)=>kn[i]!==true).map(c=>c[0]);const d=new Date();
+ return ['Self-help vocabulary trainer (Eng 13)','Name: '+($('#sname').value.trim()||'–'),'Date: '+d.toLocaleDateString('de-DE')+' '+d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),
+  'Flashcards known: '+Object.values(kn).filter(v=>v===true).length+'/15','Match: '+m+'/15','Gap fill: '+store.get('gscore',0)+'/10',
+  'Type it: '+Object.keys(store.get('tdone',{})).length+'/15','Use it: '+Object.keys(store.get('udone',{})).length+'/6','Text check: '+store.get('tfscore',0)+'/8',
+  'Still practising: '+(notyet.length?notyet.join('; '):'nothing – all known')].join('\n')}
+$('#copyres').addEventListener('click',async()=>{if(!$('#sname').value.trim()){$('#copyfb').innerHTML=fb('warn','Type your name first.');return}
+ progress();const t=resultText(),ta=$('#restext');ta.hidden=false;ta.value=t;let ok=false;
+ try{await navigator.clipboard.writeText(t);ok=true}catch(e){try{ta.focus();ta.select();ok=document.execCommand('copy')}catch(_){}}
+ $('#copyfb').innerHTML=ok?fb('good','Copied. Now paste it where your teacher tells you.'):fb('warn','Copying did not work. Select the text above and copy it by hand.')});
 
 $('#reset').addEventListener('click',()=>{if(!confirm('Delete all your answers on this device and start again?'))return;try{Object.keys(localStorage).filter(k=>k.startsWith('shv:')).forEach(k=>localStorage.removeItem(k))}catch(e){}location.hash='';location.reload()});
 show((location.hash||'').slice(1)||store.get('tab','start'));
